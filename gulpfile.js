@@ -1,24 +1,20 @@
 var gulp = require('gulp'),
-	// connect = require('gulp-connect'),
-	// jshint = require('gulp-jshint'),
-	concat = require('gulp-concat'),
-	// uglify = require('gulp-uglify'),
-	// watch = require('gulp-watch'),
-	rename = require('gulp-rename'),
-
-	dateFormat = require('dateformat'),
 	plugins = require('gulp-load-plugins')({
 		pattern: ['gulp-*', 'gulp.*'],
 		replaceString: /\bgulp[\-.]/
 	}),
 
+	// connect = require('gulp-connect'),
+	// jshint = require('gulp-jshint'),
+	// concat = require('gulp-concat'),
+	// uglify = require('gulp-uglify'),
+	// watch = require('gulp-watch'),
+	// rename = require('gulp-rename'),
+	// tmpl2js = require('gulp-tmpl2js'),
+	// insert = require('gulp-insert'),
 
-	template  = require('gulp-template-compile'),
-	path = require('gulp-path'),
-
-	insert = require('gulp-insert');
-
-
+	dateFormat = require('dateformat'),
+	path = require('path');
 
 gulp.task('connect', function() {
 	plugins.connect.server({
@@ -57,6 +53,25 @@ gulp.task('uglify', function() {
 		.pipe(gulp.dest('build'));
 });
 
+gulp.task('tmpl', function() {
+	return gulp.src('template/*.tmpl.html')
+		.pipe( plugins.tmpl2js({
+			mode: 'format',
+			wrap: false
+		}) )
+		.pipe(plugins.insert.transform(function(contents, file) {
+			var fileName = path.basename(file.path).split('.').shift();
+
+			var prefix = '(function(){\n    if(!window.nc) window.nc = {};\n    if(!nc.PROJECT_NAME) nc.PROJECT_NAME = {};\n    if(!nc.PROJECT_NAME.tmpl) nc.PROJECT_NAME.tmpl = {};\n    \n    var tmpl = ',
+				suffix = ';\n    \n    nc.PROJECT_NAME.tmpl["' + fileName + '"] = tmpl;\n}());\n';
+			return prefix + contents + suffix;
+		}))
+		.pipe( plugins.rename({
+			extname:'.js'
+		}) )
+		.pipe( gulp.dest('js/template/') ); //Output folder
+});
+
 /*
  * use tasks
  */
@@ -65,24 +80,3 @@ gulp.task('watch', function() {
 });
 
 gulp.task('build', plugins.sequence('lint', 'concat', 'custom-backup', 'uglify') );
-
-
-/*
- * test tasks
- */
-gulp.task('tmpl', function() {
-	gulp.src('template/**/*.tmpl.html')
-		.pipe( concat('tmpl.js') )
-		.pipe( insert.prepend( '(function(){\n    if(!window.nc) window.nc = {};\n    if(!nc.PROJECT_NAME) nc.PROJECT_NAME = {};\n' ) )
-		.pipe( insert.append( '\n    nc.PROJECT_NAME.tmpl = tmpl;\n}());\n' ) )
-		.pipe( gulp.dest('js/template') );
-	
-		//.pipe(plugins.insert.prepend('ohohoh'));
-});
-
-gulp.task('templates', function() {
-	return gulp.src('template/**/*.html')
-      .pipe( template() )
-      .pipe( concat('tmpl.js') )
-      .pipe(gulp.dest('js/template/')); //Output folder
-});
