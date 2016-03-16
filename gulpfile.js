@@ -1,9 +1,9 @@
-var gulp = require('gulp'),
+var pkg = require('./package.json'),
+	gulp = require('gulp'),
 	plugins = require('gulp-load-plugins')({
 		pattern: ['gulp-*', 'gulp.*'],
 		replaceString: /\bgulp[\-.]/
 	}),
-
 	// connect = require('gulp-connect'),
 	// jshint = require('gulp-jshint'),
 	// concat = require('gulp-concat'),
@@ -12,9 +12,15 @@ var gulp = require('gulp'),
 	// rename = require('gulp-rename'),
 	// tmpl2js = require('gulp-tmpl2js'),
 	// insert = require('gulp-insert'),
-
 	dateFormat = require('dateformat'),
 	path = require('path');
+
+var banner = ['/**', 
+	' * @name : <%= pkg.name %>',
+	' * @version : v<%= pkg.version %>',
+	' * @author : <%= pkg.author %>',
+	' */',
+	''].join('\n');
 
 gulp.task('connect', function() {
 	plugins.connect.server({
@@ -33,6 +39,7 @@ gulp.task('lint', function() {
 gulp.task('concat', function() {
 	return gulp.src(['js/src/util.js', 'js/src/object.js'])
 		.pipe(plugins.concat('BUILD_FILE_NAME.js'))
+		.pipe( plugins.header(banner, {pkg: pkg}) )
 		.pipe(gulp.dest('build'));
 });
 
@@ -50,6 +57,7 @@ gulp.task('uglify', function() {
 	return gulp.src('build/*')
 		.pipe(plugins.rename({suffix: '.min'}))
 		.pipe(plugins.uglify())
+		.pipe( plugins.header(banner, {pkg: pkg}) )
 		.pipe(gulp.dest('build'));
 });
 

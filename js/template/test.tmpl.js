@@ -5,7 +5,9 @@
     
     var tmpl = ''
         + '<div class="wrapArticle">'
+        + ''
         +     '<div>+ This is test.tpl.html title</div>'
+        + ''
         + '</div>';
     
     nc.PROJECT_NAME.tmpl["test"] = tmpl;
