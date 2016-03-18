@@ -13,7 +13,8 @@ var pkg = require('./package.json'),
 	// tmpl2js = require('gulp-tmpl2js'),
 	// insert = require('gulp-insert'),
 	dateFormat = require('dateformat'),
-	path = require('path');
+	path = require('path'),
+	Server = require('karma').Server;
 
 var banner = ['/**', 
 	' * @name : <%= pkg.name %>',
@@ -88,3 +89,13 @@ gulp.task('watch', function() {
 });
 
 gulp.task('build', plugins.sequence('lint', 'concat', 'custom-backup', 'uglify') );
+
+/*
+ * use karma
+ */
+gulp.task('karma', function(done) {
+	new Server({
+		configFile: __dirname + '/js/tests/karma.conf.js'
+		// singleRun: true
+	}, done).start();
+});
