@@ -12,6 +12,7 @@ var pkg = require('./package.json'),
 	// rename = require('gulp-rename'),
 	// tmpl2js = require('gulp-tmpl2js'),
 	// insert = require('gulp-insert'),
+	livereload = require('gulp-livereload'),
 	dateFormat = require('dateformat'),
 	path = require('path'),
 	Server = require('karma').Server;
@@ -26,8 +27,8 @@ var banner = ['/**',
 gulp.task('connect', function() {
 	plugins.connect.server({
 		root: './',
-		port: 8080,
-		livereload: false
+		port: 8080
+		// livereload: false
 	});
 });
 
@@ -38,10 +39,11 @@ gulp.task('lint', function() {
 });
 
 gulp.task('concat', function() {
-	return gulp.src(['js/src/util.js', 'js/src/object.js'])
+	return gulp.src(['js/lib/doT.js', 'js/template/sample.tmpl.js', 'js/template/test.tmpl.js','js/src/util.js', 'js/src/object.js'])
 		.pipe(plugins.concat('BUILD_FILE_NAME.js'))
 		.pipe( plugins.header(banner, {pkg: pkg}) )
-		.pipe(gulp.dest('build'));
+		.pipe(gulp.dest('build'))
+		.pipe( plugins.livereload() );
 });
 
 gulp.task('custom-backup', function() {
@@ -55,7 +57,7 @@ gulp.task('custom-backup', function() {
 });
 
 gulp.task('uglify', function() {
-	return gulp.src('build/*')
+	return gulp.src('build/BUILD_FILE_NAME.js')
 		.pipe(plugins.rename({suffix: '.min'}))
 		.pipe(plugins.uglify())
 		.pipe( plugins.header(banner, {pkg: pkg}) )
@@ -82,10 +84,23 @@ gulp.task('tmpl', function() {
 });
 
 /*
+ * livereload
+ */
+gulp.task('reload', function() {
+	console.log('reload');
+	gulp.src('css/**/*.css').pipe( plugins.livereload() );
+	// gulp.src('build/**/*.js').pipe( plugins.livereload() );
+});
+
+/*
  * use tasks
  */
 gulp.task('watch', function() {
-	gulp.watch(['js/**/*.js'], ['lint']);
+	// set livereload
+	plugins.livereload.listen();
+
+	gulp.watch(['js/**/*.js'], ['lint', 'concat']);
+	gulp.watch(['css/**/*.css'], ['reload']);
 });
 
 gulp.task('build', plugins.sequence('lint', 'concat', 'custom-backup', 'uglify') );

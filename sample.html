@@ -21,6 +21,7 @@
       }
       a {text-decoration:none;}
     </style>
+    <link rel="stylesheet" href="css/sample.css">
   </head>
 
   <body>
@@ -28,10 +29,13 @@
     </div>
 
     <script src="js/lib/jquery-1.7.0.min.js"></script>
+    <!--
     <script src="js/lib/doT.js"></script>
     <script src="js/template/sample.tmpl.js"></script>
     <script src="js/template/test.tmpl.js"></script>
     <script src="js/src/util.js"></script>
+    -->
+    <script src="build/BUILD_FILE_NAME.js"></script>
     <script>
       (function($) {
         "use strict";
@@ -64,6 +68,11 @@
           }
         });
       }(jQuery));
+    </script>
+
+    <script>
+      document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+              ':35729/livereload.js?snipver=1"></' + 'script>')
     </script>
   </body>
   
